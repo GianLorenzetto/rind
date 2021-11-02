@@ -1,0 +1,8 @@
+[package]
+name = "rind"
+version = "0.1.0"
+edition = "2018"
+authors = ["Gian Lorenzetto <gian.lorenzetto@gmail.com>"]
+description = "Rust version of nix find command"
+
+[dependencies]
