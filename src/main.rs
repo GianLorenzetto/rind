@@ -1,7 +1,10 @@
 use std::env;
 use std::fs;
-use std::io::prelude::*;
 use std::path::Path;
+
+enum ReturnCode {
+    Error = 1,
+}
 
 fn print_folder_contents(path: &Path) {
     let contents = fs::read_dir(path).expect("Unable to read path");
@@ -25,11 +28,25 @@ fn print_file(path: &Path) {
     println!("F: {} ({} bytes)", path.display(), size);
 }
 
-fn main() {
-    let arg1 = env::args().nth(1).expect("Usage: fview PATH");
-    let path = Path::new(&arg1);
-    match path.is_dir() {
-        true => print_folder_contents(&path),
-        _ => print_file(&path),
+fn print_usage() {
+    println!("Usage: rind <path>");
+}
+
+fn main() -> Result<(), i32> {
+    let path_arg = match env::args().nth(1) {
+        Some(path) => path,
+        _ => String::new(),
     };
+
+    let path = Path::new(&path_arg);
+    match path.is_dir() {
+        true => {
+            print_folder_contents(&path);
+            Ok(())
+        }
+        _ => {
+            print_usage();
+            Err(ReturnCode::Error as i32)
+        }
+    }
 }
