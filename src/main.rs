@@ -1,15 +1,11 @@
-mod exit_code;
+mod error_condition;
 mod file_info;
 mod folder_info;
 
 use crate::folder_info::FolderInfo;
-use exit_code::ErrorCondition;
-use std::env;
+use clap::{App, Arg};
+use error_condition::ErrorCondition;
 use std::path::PathBuf;
-
-fn print_usage() {
-    println!("Usage: rind <path>");
-}
 
 fn process_folders(path: PathBuf) -> Result<Vec<FolderInfo>, ErrorCondition> {
     let mut folders = vec![];
@@ -23,7 +19,7 @@ fn process_folders(path: PathBuf) -> Result<Vec<FolderInfo>, ErrorCondition> {
                     }
                     folders.push(fi);
                 }
-                Err(code) => return Err(code.into()),
+                Err(ec) => return Err(ec),
             }
         } else {
             break;
@@ -44,19 +40,31 @@ fn print_folder(fi: &FolderInfo) {
 }
 
 fn main() -> Result<(), i32> {
-    let path_arg = match env::args().nth(1) {
-        Some(path) => path,
-        _ => String::new(),
-    };
+    let args = App::new("rind")
+        .version("0.1")
+        .about("Rust version of find(-lite) command")
+        .arg(
+            Arg::with_name("path")
+                .help("The top-level path to search")
+                .takes_value(true)
+                .required(true),
+        )
+        .get_matches();
+
+    let path_arg = args.value_of("path").unwrap();
 
     let path = PathBuf::from(&path_arg);
     if !path.is_dir() {
-        print_usage();
-        return Err(ErrorCondition::invalid_argument().into());
+        let ec = ErrorCondition::invalid_argument("path");
+        eprintln!("{}", ec);
+        return Err(ec.into());
     }
 
     match process_folders(path) {
-        Err(code) => Err(code.into()),
+        Err(ec) => {
+            eprintln!("{}", ec);
+            Err(ec.into())
+        }
         Ok(folders) => {
             for fi in folders.iter() {
                 print_folder(fi);
@@ -68,7 +76,7 @@ fn main() -> Result<(), i32> {
 
 #[cfg(test)]
 mod tests {
-    use crate::exit_code::ErrorCondition;
+    use crate::error_condition::ErrorCondition;
     use crate::process_folders;
     use std::path::PathBuf;
 

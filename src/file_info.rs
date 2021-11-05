@@ -1,4 +1,4 @@
-use crate::exit_code::ErrorCondition;
+use crate::error_condition::ErrorCondition;
 use std::fmt;
 use std::fmt::Formatter;
 use std::path::PathBuf;
@@ -11,7 +11,7 @@ pub struct FileInfo {
 impl FileInfo {
     pub fn create(path: PathBuf) -> Result<Self, ErrorCondition> {
         if !path.exists() {
-            return Err(ErrorCondition::invalid_path());
+            return Err(ErrorCondition::invalid_path(&path));
         }
 
         match path.metadata() {
@@ -19,7 +19,7 @@ impl FileInfo {
                 path,
                 size: md.len() as usize,
             }),
-            _ => Err(ErrorCondition::file_meta_data()),
+            _ => Err(ErrorCondition::file_meta_data(&path)),
         }
     }
 }
@@ -32,7 +32,7 @@ impl fmt::Display for FileInfo {
 
 #[cfg(test)]
 mod tests {
-    use crate::exit_code::ErrorCondition;
+    use crate::error_condition::ErrorCondition;
     use crate::file_info::FileInfo;
     use std::path::{Path, PathBuf};
 
@@ -51,6 +51,6 @@ mod tests {
         let path = PathBuf::from(&path_str);
         let result = FileInfo::create(path);
         assert!(result.is_err());
-        assert_eq!(result.err().unwrap(), ErrorCondition::invalid_path());
+        assert_eq!(result.err().unwrap(), ErrorCondition::invalid_path(&path));
     }
 }

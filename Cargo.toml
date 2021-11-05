@@ -6,3 +6,4 @@ authors = ["Gian Lorenzetto <gian.lorenzetto@gmail.com>"]
 description = "Rust version of nix find command"
 
 [dependencies]
+clap = "2"

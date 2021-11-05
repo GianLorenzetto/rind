@@ -1,4 +1,4 @@
-use crate::exit_code::ErrorCondition;
+use crate::error_condition::ErrorCondition;
 use crate::file_info::FileInfo;
 
 use std::fs;
@@ -13,7 +13,7 @@ pub struct FolderInfo {
 impl FolderInfo {
     pub fn create(path: PathBuf) -> Result<Self, ErrorCondition> {
         if !path.is_dir() {
-            return Err(ErrorCondition::invalid_path());
+            return Err(ErrorCondition::invalid_path(&path));
         }
 
         let mut files: Vec<FileInfo> = vec![];
@@ -36,7 +36,7 @@ impl FolderInfo {
                     }
                 }
             }
-            _ => return Err(ErrorCondition::list_directory()),
+            _ => return Err(ErrorCondition::list_directory(&path)),
         }
 
         Ok(Self {
@@ -49,7 +49,7 @@ impl FolderInfo {
 
 #[cfg(test)]
 mod tests {
-    use crate::exit_code::ErrorCondition;
+    use crate::error_condition::ErrorCondition;
     use crate::folder_info::FolderInfo;
     use std::path::PathBuf;
 
