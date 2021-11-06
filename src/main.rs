@@ -6,6 +6,7 @@ use crate::folder_info::FolderInfo;
 use clap::{App, Arg};
 use error_condition::ErrorCondition;
 use std::path::PathBuf;
+use std::time::Instant;
 
 fn process_folders(path: PathBuf) -> Result<Vec<FolderInfo>, ErrorCondition> {
     let mut folders = vec![];
@@ -49,9 +50,17 @@ fn main() -> Result<(), i32> {
                 .takes_value(true)
                 .required(true),
         )
+        .arg(
+            Arg::with_name("quiet")
+                .short("q")
+                .long("quiet")
+                .takes_value(false)
+                .help("Do not print results to stdout"),
+        )
         .get_matches();
 
     let path_arg = args.value_of("path").unwrap();
+    let is_quiet = args.is_present("quiet");
 
     let path = PathBuf::from(&path_arg);
     if !path.is_dir() {
@@ -60,14 +69,18 @@ fn main() -> Result<(), i32> {
         return Err(ec.into());
     }
 
+    let start = Instant::now();
     match process_folders(path) {
         Err(ec) => {
             eprintln!("{}", ec);
             Err(ec.into())
         }
         Ok(folders) => {
+            println!("Processed folder in {}ms", start.elapsed().as_millis());
             for fi in folders.iter() {
-                print_folder(fi);
+                if !is_quiet {
+                    print_folder(fi);
+                }
             }
             Ok(())
         }
