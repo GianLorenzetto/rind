@@ -4,10 +4,18 @@ A copy of the *nix `find` cli tool, written in rust.
 
 ## Usage
 
-`$ rind <path>`
+```asm
+rind 0.1
+Rust version of find(-lite) command
 
-- Lists all files and folders below the given `<path>`
+USAGE:
+    rind [FLAGS] <path>
 
-`$ rind --help`
+FLAGS:
+    -h, --help       Prints help information
+    -q, --quiet      Do not print results to stdout
+    -V, --version    Prints version information
 
-- Print usage and help information
+ARGS:
+    <path>    The top-level path to search
+```
